@@ -1,4 +1,4 @@
-// main.dart - v4 (safe storage)
+// main.dart - v5 (developer credit)
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -818,6 +818,14 @@ class _HomePageState extends State<HomePage> {
                 ]),
               ),
             ],
+            const SizedBox(height: 28),
+            const Center(
+              child: Text(
+                'Developed by Hasan',
+                textDirection: TextDirection.ltr,
+                style: TextStyle(color: Colors.black45, fontSize: 13, letterSpacing: 0.5),
+              ),
+            ),
           ],
         ),
       ),
