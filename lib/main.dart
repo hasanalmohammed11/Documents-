@@ -1,4 +1,4 @@
-// main.dart - v3 (safe startup)
+// main.dart - v4 (safe storage)
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -226,15 +226,47 @@ class DocData {
 // ───────────────────────── التخزين ─────────────────────────
 
 class Store {
-  static late SharedPreferences p;
-  static Future<void> init() async => p = await SharedPreferences.getInstance();
-  static String get biz => p.getString('biz') ?? '';
-  static String get cur => p.getString('cur') ?? 'ل.س';
+  static SharedPreferences? _p;
+  static final Map<String, Object> _mem = {};
+
+  // إذا فشل التخزين الدائم يعمل التطبيق بالذاكرة المؤقتة بدل أن يتوقف
+  static Future<void> init() async {
+    try {
+      _p = await SharedPreferences.getInstance().timeout(const Duration(seconds: 5));
+    } catch (_) {
+      _p = null;
+    }
+  }
+
+  static String? _gs(String k) {
+    try {
+      final v = _p?.getString(k);
+      if (v != null) return v;
+    } catch (_) {}
+    return _mem[k] as String?;
+  }
+
+  static Future<void> setS(String k, String v) async {
+    _mem[k] = v;
+    try {
+      await _p?.setString(k, v);
+    } catch (_) {}
+  }
+
+  static String get biz => _gs('biz') ?? '';
+  static String get cur => _gs('cur') ?? 'ل.س';
+
+  static List<String> _gl() {
+    try {
+      final l = _p?.getStringList('recent');
+      if (l != null) return l;
+    } catch (_) {}
+    return (_mem['recent'] as List<String>?) ?? <String>[];
+  }
 
   static List<DocData> recent() {
-    final l = p.getStringList('recent') ?? [];
     final out = <DocData>[];
-    for (final s in l) {
+    for (final s in _gl()) {
       try {
         out.add(DocData.fromJson(jsonDecode(s)));
       } catch (_) {}
@@ -242,8 +274,13 @@ class Store {
     return out;
   }
 
-  static Future<void> _put(List<DocData> l) =>
-      p.setStringList('recent', l.map((e) => jsonEncode(e.toJson())).toList());
+  static Future<void> _put(List<DocData> l) async {
+    final strs = l.map((e) => jsonEncode(e.toJson())).toList();
+    _mem['recent'] = strs;
+    try {
+      await _p?.setStringList('recent', strs);
+    } catch (_) {}
+  }
 
   static Future<void> save(DocData d) async {
     final l = recent()..removeWhere((e) => e.id == d.id);
@@ -530,8 +567,8 @@ class _HomePageState extends State<HomePage> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
           FilledButton(
             onPressed: () async {
-              await Store.p.setString('biz', b.text.trim());
-              await Store.p.setString('cur', c.text.trim().isEmpty ? 'ل.س' : c.text.trim());
+              await Store.setS('biz', b.text.trim());
+              await Store.setS('cur', c.text.trim().isEmpty ? 'ل.س' : c.text.trim());
               if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('حفظ'),
