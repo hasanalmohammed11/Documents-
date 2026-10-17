@@ -43,10 +43,13 @@ jobs:
       - name: Apply app icon (icon.png in repo root)
         run: |
           if [ -f icon.png ]; then
+            sudo apt-get update -y
+            sudo apt-get install -y imagemagick
+            if command -v convert >/dev/null 2>&1; then IM="convert"; else IM="magick"; fi
             for p in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
               set -- $p
               mkdir -p android/app/src/main/res/mipmap-$1
-              convert icon.png -resize ${2}x${2} android/app/src/main/res/mipmap-$1/ic_launcher.png
+              $IM icon.png -resize ${2}x${2} android/app/src/main/res/mipmap-$1/ic_launcher.png
             done
             rm -rf android/app/src/main/res/mipmap-anydpi-v26
           else
