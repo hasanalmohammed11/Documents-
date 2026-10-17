@@ -1,3 +1,4 @@
+// main.dart - v2 (fixed pw.Row textDirection)
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -304,7 +305,6 @@ Future<Uint8List> buildPdf(Tpl t, DocData d) async {
   final w = <pw.Widget>[];
 
   w.add(pw.Row(
-    textDirection: rtl,
     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -327,7 +327,6 @@ Future<Uint8List> buildPdf(Tpl t, DocData d) async {
       w.add(pw.Padding(
         padding: const pw.EdgeInsets.only(bottom: 5),
         child: pw.Row(
-          textDirection: rtl,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text('${f.label}: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
@@ -348,7 +347,6 @@ Future<Uint8List> buildPdf(Tpl t, DocData d) async {
             border: const pw.Border(bottom: pw.BorderSide(color: PdfColors.grey400, width: 0.5)),
           ),
           child: pw.Row(
-            textDirection: rtl,
             children: [
               for (var i = 0; i < c.length; i++)
                 pw.Expanded(
@@ -405,7 +403,6 @@ Future<Uint8List> buildPdf(Tpl t, DocData d) async {
           pw.Text(s, style: const pw.TextStyle(fontSize: 11)),
         ]);
     w.add(pw.Row(
-      textDirection: rtl,
       mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
       children: [sig('التوقيع'), sig('الختم')],
     ));
