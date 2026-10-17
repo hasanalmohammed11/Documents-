@@ -40,6 +40,19 @@ jobs:
           perl -0pi -e 's/(Row\(\n)[ \t]*textDirection: rtl,\n/$1/g' lib/main.dart
           grep -n "textDirection" lib/main.dart || true
 
+      - name: Apply app icon (icon.png in repo root)
+        run: |
+          if [ -f icon.png ]; then
+            for p in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
+              set -- $p
+              mkdir -p android/app/src/main/res/mipmap-$1
+              convert icon.png -resize ${2}x${2} android/app/src/main/res/mipmap-$1/ic_launcher.png
+            done
+            rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          else
+            echo "icon.png not found, using default icon"
+          fi
+
       - run: flutter pub get
 
       - run: flutter build apk --release --no-shrink
