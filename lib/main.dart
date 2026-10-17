@@ -821,7 +821,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 28),
             const Center(
               child: Text(
-                'Developed by Hasan',
+                'Developer by Hasan',
                 textDirection: TextDirection.ltr,
                 style: TextStyle(color: Colors.black45, fontSize: 13, letterSpacing: 0.5),
               ),
