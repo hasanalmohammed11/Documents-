@@ -32,6 +32,8 @@ jobs:
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' $M
           sed -i 's|android:label="[^"]*"|android:label="القوالب الجاهزة"|' $M
+          perl -0pi -e 's|(<application[^>]*>)|$1\n        <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="false"/>|' $M
+          cat $M
 
       - name: Auto-fix pw.Row textDirection (safe on old and new main.dart)
         run: |
