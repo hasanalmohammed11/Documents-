@@ -1,4 +1,4 @@
-// main.dart - v2 (fixed pw.Row textDirection)
+// main.dart - v3 (safe startup)
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -427,8 +427,56 @@ Future<Uint8List> buildPdf(Tpl t, DocData d) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Store.init();
-  runApp(const App());
+  // إظهار أي خطأ على الشاشة بدل البقاء على شاشة التحميل
+  ErrorWidget.builder = (d) => Material(
+        color: Colors.white,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('حدث خطأ:\n${d.exceptionAsString()}',
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(color: Colors.red, fontSize: 14)),
+          ),
+        ),
+      );
+  runApp(const Boot());
+}
+
+class Boot extends StatefulWidget {
+  const Boot({super.key});
+  @override
+  State<Boot> createState() => _BootState();
+}
+
+class _BootState extends State<Boot> {
+  late final Future<void> f = Store.init().timeout(const Duration(seconds: 10));
+  @override
+  Widget build(BuildContext context) => FutureBuilder<void>(
+        future: f,
+        builder: (c, s) {
+          if (s.hasError) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text('تعذر تشغيل التطبيق:\n${s.error}',
+                        textDirection: TextDirection.rtl, textAlign: TextAlign.center),
+                  ),
+                ),
+              ),
+            );
+          }
+          if (s.connectionState != ConnectionState.done) {
+            return const MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(body: Center(child: CircularProgressIndicator())),
+            );
+          }
+          return const App();
+        },
+      );
 }
 
 class App extends StatelessWidget {
